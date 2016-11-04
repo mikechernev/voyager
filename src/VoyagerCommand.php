@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Process\Process;
+use Symfony\Component\Process\ProcessBuilder;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Exception;
 
@@ -66,13 +66,11 @@ class VoyagerCommand extends Command
 
         $this->info("Dumping the autoloaded files and reloading all new files");
 
-        $process = new Process('composer dump-autoload');
-        $process->run();
+        $processBuilder = new ProcessBuilder(['composer','dump-autoload']);
+        $processBuilder->setWorkingDirectory(base_path())->getProcess()->run();
 
         $this->info("Seeding data into the database");
-        $process = new Process('php artisan db:seed --class=VoyagerDatabaseSeeder');
-        $process->run();
-
+        Artisan::call('db:seed', ['--class' => 'VoyagerDatabaseSeeder']);
 
         $this->info("Adding the storage symlink to your public folder");
         Artisan::call('storage:link');
